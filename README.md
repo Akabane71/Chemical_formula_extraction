@@ -1,3 +1,8 @@
+# 思路
+使用 minerU 进行 pdf识别
+使用 yolo 的 UniParser/MolDet 来提取分子式
+使用 llm 来对 minerU 提取的 markdown 文件 进行分析，提取结构化数据
+
 # minerU 服务
 
 ```bash
