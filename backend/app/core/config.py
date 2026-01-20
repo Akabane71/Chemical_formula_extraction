@@ -50,7 +50,24 @@ class AzureOpenAISettings(BaseSettings):
     AZURE_OPENAI_API_KEY: str
     AZURE_OPENAI_API_VERSION: str = "2024-06-01-preview"
 
+
+class BrokerSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=f"{dir_path}/../.env",
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
+
+STATIC_DIR = Path(Path(__file__).parent.parent, "static")
+TMP_DIR = Path(Path(__file__).parent.parent, "tmp")
+MOCK_DIR = Path(Path(__file__).parent.parent, "mock")
+
+
 settings = Settings()
 azure_blob_settings = AzureBlobSettings()
 mineru_config_settings = MinerUConfigSettings()
 azure_openai_settings = AzureOpenAISettings()
+broker_settings = BrokerSettings()
