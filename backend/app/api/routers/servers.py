@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
-from app.services.process_pdf.actions import process_pdf_file, get_task_result_action
+from backend.app.services.process_pdf.yolo_actions import process_pdf_file, get_task_result_action
 
 router = APIRouter()
 

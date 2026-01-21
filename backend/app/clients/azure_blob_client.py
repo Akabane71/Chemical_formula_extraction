@@ -1,22 +1,35 @@
 from app.core.config import azure_blob_settings
 from azure.storage.blob.aio import BlobServiceClient
-import logging
 import aiofiles
+import asyncio
+
+_container_client = None
+_container_lock = asyncio.Lock()
+_container_checked = False
+
 
 async def get_container_client():
     CONNECTION_STRING = azure_blob_settings.AZURE_STORAGE_CONNECTION_STRING
     CONTAINER_NAME = azure_blob_settings.AZURE_STORAGE_CONTAINER_NAME
-    
-    logging.info(f"Using Azure Blob Storage with container: {CONTAINER_NAME}")
-    logging.info(f"Connection String: {CONNECTION_STRING}")
+    global _container_client, _container_checked
 
-    bsc = BlobServiceClient.from_connection_string(CONNECTION_STRING)
-    container = bsc.get_container_client(CONTAINER_NAME)
-    try:
-        await container.get_container_properties()
-    except Exception as e:
-        raise RuntimeError(f"Container error: {e}")
-    return container
+    if _container_client is not None and _container_checked:
+        return _container_client
+
+    async with _container_lock:
+        if _container_client is not None and _container_checked:
+            return _container_client
+
+        bsc = BlobServiceClient.from_connection_string(CONNECTION_STRING)
+        container = bsc.get_container_client(CONTAINER_NAME)
+        try:
+            await container.get_container_properties()
+        except Exception as e:
+            raise RuntimeError(f"Container error: {e}")
+
+        _container_client = container
+        _container_checked = True
+        return _container_client
 
 
 

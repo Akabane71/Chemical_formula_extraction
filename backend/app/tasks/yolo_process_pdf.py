@@ -37,20 +37,31 @@ def render_pdf_page(page, dpi: int):
 
 
 
-async def publish_imgs_to_azure_blob(img_paths: list[Path],azure_dir_name:str) -> list[str]:
+async def publish_imgs_to_azure_blob(
+    img_paths: list[Path],
+    azure_dir_name: str,
+    max_concurrency: int = 8,
+) -> list[str]:
     """
     将图片上传到 Azure Blob 存储，并返回其 URL 列表
     """
     from app.clients.azure_blob_client import upload_img_to_azure_blob
-    blob_urls = []
-    for img_path in img_paths:
-        blob_url = await upload_img_to_azure_blob(
-            img_path=img_path,
-            upload_dir= azure_dir_name)
-        blob_urls.append(
-            {"img_path": img_path, "blob_url": blob_url}
-        )
-    return blob_urls
+
+    if not img_paths:
+        return []
+
+    semaphore = asyncio.Semaphore(max_concurrency)
+
+    async def _upload_one(img_path: Path) -> dict:
+        async with semaphore:
+            blob_url = await upload_img_to_azure_blob(
+                img_path=str(img_path),
+                upload_dir=azure_dir_name,
+            )
+            return {"img_path": img_path, "blob_url": blob_url}
+
+    tasks = [_upload_one(img_path) for img_path in img_paths]
+    return await asyncio.gather(*tasks)
 
 
 @celery_app.task
