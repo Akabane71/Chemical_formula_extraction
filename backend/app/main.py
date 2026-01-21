@@ -1,7 +1,8 @@
 import logging
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.core.logging import setup_loguru
-from app.core.config import settings
+from app.core.config import TMP_PDF_IMGS_DIR, settings
 from pathlib import Path
 from app.api.api import router
 
@@ -16,6 +17,8 @@ from app.api.api import router
 # 标准 logging 也会进 loguru
 logger = logging.getLogger("app")  
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=TMP_PDF_IMGS_DIR), name="static")
 
 
 # 包含路由
