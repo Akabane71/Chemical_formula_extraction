@@ -33,8 +33,7 @@ def check_pdf_content(pdf_bytes: bytes) -> None:
             break
     if not has_text:
         logger.warning("PDF 文件没有可识别的文本内容")
-        # 你可以选择抛出异常或仅警告
-        raise ValueError("PDF 文件没有可识别的文本内容")
+        # OCR 仍可处理扫描版 PDF，因此不抛出异常
 
 
 def check_pdf_file(pdf_file: UploadFile = File(...))->None:

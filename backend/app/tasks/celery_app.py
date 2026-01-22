@@ -1,12 +1,12 @@
 from celery import Celery
-from app.core.config import rabbit_mq_settings,mongodb_settings
+from app.core.config import rabbit_mq_settings, build_mongo_uri
 
 celery_app = Celery(
     "process_pdf",
     # RabbitMQ 作为消息中间件
     broker=f"amqp://{rabbit_mq_settings.RABBITMQ_USER}:{rabbit_mq_settings.RABBITMQ_PASSWORD}@{rabbit_mq_settings.RABBITMQ_HOST}:{rabbit_mq_settings.RABBITMQ_PORT}{rabbit_mq_settings.RABBITMQ_VHOST}",   
     # MongoDB 作为结果后端
-    backend=f"mongodb://{mongodb_settings.MONGODB_USER}:{mongodb_settings.MONGODB_PASSWORD}@{mongodb_settings.MONGODB_HOST}:{mongodb_settings.MONGODB_PORT}"                                   
+    backend=build_mongo_uri(),
 )
 
 # 自动发现 tasks

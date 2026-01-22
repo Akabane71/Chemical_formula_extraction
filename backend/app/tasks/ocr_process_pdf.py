@@ -27,7 +27,7 @@ def process_pdf_with_ocr(blob_path: str) -> dict:
             raise
         fallback_model_id = "prebuilt-read"
         logger.warning(
-            "Model not found: %s. Falling back to %s.",
+            "Model not found: {}. Falling back to {}.",
             model_id,
             fallback_model_id,
         )

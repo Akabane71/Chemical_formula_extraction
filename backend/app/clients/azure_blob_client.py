@@ -6,22 +6,25 @@ import aiofiles
 import datetime
 import asyncio
 
-_container_client = None
-_container_lock = asyncio.Lock()
-_container_checked = False
+_container_clients = {}
+_container_locks = {}
 
 
 async def get_container_client():
     CONNECTION_STRING = azure_blob_settings.AZURE_STORAGE_CONNECTION_STRING
     CONTAINER_NAME = azure_blob_settings.AZURE_STORAGE_CONTAINER_NAME
-    global _container_client, _container_checked
+    loop = asyncio.get_running_loop()
+    loop_id = id(loop)
 
-    if _container_client is not None and _container_checked:
-        return _container_client
+    if loop_id in _container_clients:
+        return _container_clients[loop_id]
 
-    async with _container_lock:
-        if _container_client is not None and _container_checked:
-            return _container_client
+    if loop_id not in _container_locks:
+        _container_locks[loop_id] = asyncio.Lock()
+
+    async with _container_locks[loop_id]:
+        if loop_id in _container_clients:
+            return _container_clients[loop_id]
 
         bsc = BlobServiceClient.from_connection_string(CONNECTION_STRING)
         container = bsc.get_container_client(CONTAINER_NAME)
@@ -30,9 +33,8 @@ async def get_container_client():
         except Exception as e:
             raise RuntimeError(f"Container error: {e}")
 
-        _container_client = container
-        _container_checked = True
-        return _container_client
+        _container_clients[loop_id] = container
+        return _container_clients[loop_id]
 
 
 

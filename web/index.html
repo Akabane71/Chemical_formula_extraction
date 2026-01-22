@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF 化学式抽取</title>
+  <link rel="stylesheet" href="/web/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;600&family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/filepond@4.30.4/dist/filepond.css" rel="stylesheet">
+  <link href="https://unpkg.com/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="grid-lines"></div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>PDF 化学式抽取</h1>
+        <div class="subtitle">上传文献，自动提取化学式并结构化输出</div>
+      </div>
+      <div>
+        <span class="pill">YOLO 图像提取</span>
+        <span class="pill">OCR 文本识别</span>
+        <span class="pill">Azure GPT 结构化</span>
+      </div>
+    </header>
+    <div class="grid">
+      <div class="card">
+        <div class="label">上传文件</div>
+        <div class="row upload-row">
+          <input type="file" id="pdfFile" class="filepond" accept="application/pdf" />
+          <button id="uploadBtn" class="cta">开始处理</button>
+        </div>
+        <div id="status" class="status badge">等待上传</div>
+        <div class="hint">支持 PDF；同文件会从缓存直接返回结果。</div>
+        <div class="meter">
+          <span>处理进度</span>
+          <div class="bar"><i></i></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">结果</div>
+        <div class="section-title">抽取结果</div>
+        <div id="extractList" class="extract-list"></div>
+        <div class="section-title">图片预览</div>
+        <div id="imageGrid" class="images-grid"></div>
+        <div class="section-title">原始 JSON</div>
+        <pre id="result" class="result"><code class="language-json">{}</code></pre>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/filepond@4.30.4/dist/filepond.js"></script>
+  <script src="https://unpkg.com/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://unpkg.com/prismjs@1.29.0/components/prism-clike.min.js"></script>
+  <script src="https://unpkg.com/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="/web/app.js"></script>
+</body>
+</html>

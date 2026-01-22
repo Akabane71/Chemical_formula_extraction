@@ -107,6 +107,7 @@ def process_pdf_with_yolo(blob_path: str) -> list[dict]:
                     "det_idx": det_idx,
                     "class": cls,
                     "conf": conf,
+                    "img_path": out_path,
                     "crop_path": abs_path_to_web_path(out_path),
                     "bbox": [int(x1), int(y1), int(x2), int(y2)],
                 })
