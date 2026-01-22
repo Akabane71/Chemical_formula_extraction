@@ -24,3 +24,8 @@ app.mount("/static", StaticFiles(directory=TMP_PDF_IMGS_DIR), name="static")
 # 包含路由
 app.include_router(router)
 
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8000)

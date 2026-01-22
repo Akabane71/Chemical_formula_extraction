@@ -63,7 +63,7 @@ async def process_pdf_file(pdf_file: UploadFile = File(...)) -> str:
     file_id = str(uuid.uuid4())
     pdf_path = TMP_UPLOAD_DIR / f"{file_id}.pdf"
     
-    data = pdf_file.file.read()
+    data = await pdf_file.read()
     async with aiofiles.open(pdf_path, "wb") as buffer:
         await buffer.write(data)
         
@@ -73,17 +73,3 @@ async def process_pdf_file(pdf_file: UploadFile = File(...)) -> str:
     return task.id
 
 
-async def get_task_result_action(task_id: str):
-    """
-    获取 Celery 任务结果
-    """
-    from app.tasks.yolo_process_pdf import celery_app
-    result = celery_app.AsyncResult(task_id)
-    if result.ready():
-        res = result.result
-        # 如果是异常对象，返回字符串
-        if isinstance(res, Exception):
-            return {"error": str(res)}
-        return res
-    else:
-        return None

@@ -12,9 +12,15 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     restart: unless-stopped
 
-  # 你可以在这里添加 celery worker 和其他服务
-  # celery_worker:
-  #   build: .
-  #   command: celery -A your_project.celery_app worker --loglevel=info
-  #   depends_on:
-  #     - rabbitmq
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      # 开发阶段只用 root 用户就行
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ./data/mongo_data:/data/db
+    restart: unless-stopped

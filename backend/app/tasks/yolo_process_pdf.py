@@ -1,7 +1,7 @@
 import os
 from app.tasks.celery_app import celery_app
 from ultralytics import YOLO
-from app.core.config import STATIC_DIR,TMP_PDF_IMGS_DIR
+from app.core.config import STATIC_DIR,TMP_PDF_IMGS_DIR,AZURE_BLOB_PDF_IMG_DIR
 import fitz  # PyMuPDF
 import cv2
 import numpy as np
@@ -32,9 +32,6 @@ def render_pdf_page(page, dpi: int):
         cv2.IMREAD_COLOR,
     )
     return img
-
-
-
 
 
 async def publish_imgs_to_azure_blob(
@@ -114,7 +111,7 @@ def process_pdf_with_yolo(pdf_path: str) -> list[dict]:
         results.append({"page": page_idx, "detections": page_result})
         
     # 上传到azure blob存储中
-    blob_urls = asyncio.run(publish_imgs_to_azure_blob(imgs_paths, os.path.basename(pdf_path)))
+    blob_urls = asyncio.run(publish_imgs_to_azure_blob(imgs_paths, AZURE_BLOB_PDF_IMG_DIR + "/" + os.path.basename(pdf_path)))
     # blob_urls格式：list[{"img_path":..., "blob_url":...}]
     
     return {

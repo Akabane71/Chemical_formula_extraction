@@ -53,6 +53,18 @@ class AzureOpenAISettings(BaseSettings):
     AZURE_OPENAI_API_VERSION: str = "2024-06-01-preview"
 
 
+class AzureDocumentIntelligenceSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=str(ENV_FILE_PATH),
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+    AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: str
+    AZURE_DOCUMENT_INTELLIGENCE_API_KEY: str
+    AZURE_DOCUMENT_INTELLIGENCE_MODEL: str = "prebuilt-document"
+
+
 class RabbitMQSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE_PATH),
@@ -66,6 +78,19 @@ class RabbitMQSettings(BaseSettings):
     RABBITMQ_PORT: int
     RABBITMQ_VHOST: str
 
+class MongoDBSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=str(ENV_FILE_PATH),
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        extra="ignore",
+    )
+    MONGODB_USER: str
+    MONGODB_PASSWORD: str
+    MONGODB_HOST: str
+    MONGODB_PORT: int
+    MONGODB_DBNAME: str
+
 
 STATIC_DIR = Path(Path(__file__).parent.parent.parent, "static")
 TMP_DIR = Path(Path(__file__).parent.parent.parent, "tmp")
@@ -77,8 +102,14 @@ TMP_PDF_IMGS_DIR = TMP_DIR / "pdf_imgs"
 TMP_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 TMP_PDF_IMGS_DIR.mkdir(parents=True, exist_ok=True)
 
+AZURE_BLOB_PDF_DIR = "pdfs"
+AZURE_BLOB_PDF_IMG_DIR = "pdf_imgs"
+
+
 settings = Settings()
 azure_blob_settings = AzureBlobSettings()
 mineru_config_settings = MinerUConfigSettings()
 azure_openai_settings = AzureOpenAISettings()
+azure_document_intelligence_settings = AzureDocumentIntelligenceSettings()
 rabbit_mq_settings = RabbitMQSettings()
+mongodb_settings = MongoDBSettings()

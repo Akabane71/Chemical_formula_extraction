@@ -1,16 +1,57 @@
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import JSONResponse
-from backend.app.services.process_pdf.yolo_actions import process_pdf_file, get_task_result_action
+from app.services.process_pdf.yolo_actions import process_pdf_file
+from app.services.process_pdf.ocr_actions import process_pdf_file_with_ocr
+from app.tasks.celery_app import get_task_result_action
 
 router = APIRouter()
 
-@router.post("/tasks/process_pdf")
+@router.post("/uploads/pdf")
+async def upload_pdf_endpoint(pdf_file: UploadFile = File(...))->JSONResponse:
+    """
+    API 端点，上传 PDF 文件, 并将文件上传到 azuer blob 存储
+    """
+    try:
+        contents = await pdf_file.read()
+        file_size = len(contents)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+    return JSONResponse({"filename": pdf_file.filename, "size": file_size})
+
+
+
+
+@router.post("/tasks/yolo_process_pdf")
 async def process_pdf_endpoint(pdf_file: UploadFile = File(...))->JSONResponse:
     """
-    API 端点，处理上传的 PDF 文件
+    API 端点, 使用 YOLO 处理上传的 PDF 文件
     """
     try:
         res = await process_pdf_file(pdf_file)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+    return JSONResponse({"task_id": res})
+
+
+@router.post("/tasks/ocr_process_pdf")
+async def ocr_process_pdf_endpoint(pdf_file: UploadFile = File(...))->JSONResponse:
+    """
+    API 端点，使用 OCR 处理上传的 PDF 文件
+    """
+    try:
+        res = await process_pdf_file_with_ocr(pdf_file)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+    return JSONResponse({"task_id": res})
+
+
+@router.post("/tasks/llm_process")
+async def llm_process_endpoint(data: dict)->JSONResponse:
+    """
+    API 端点，使用 LLM 处理数据
+    """
+    try:
+        res = 1
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
     return JSONResponse({"task_id": res})
