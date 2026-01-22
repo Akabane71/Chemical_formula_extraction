@@ -38,3 +38,8 @@ pkill -f 'celery'
 uv run uvicorn app.main:app
 
 uv run app/tests/tasks/tests_yolo_process_pdf.py
+
+
+# 新知识点：
+
+PYTHONPATH = .

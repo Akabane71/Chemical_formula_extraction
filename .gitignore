@@ -8,9 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+data/
 
 tmp/
 
 .env
-
+tmp_test/
 logs
