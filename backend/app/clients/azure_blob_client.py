@@ -1,6 +1,9 @@
 from app.core.config import azure_blob_settings
+from urllib.parse import unquote, urlparse
+from azure.storage.blob import BlobServiceClient as SyncBlobServiceClient
 from azure.storage.blob.aio import BlobServiceClient
 import aiofiles
+import datetime
 import asyncio
 
 _container_client = None
@@ -64,5 +67,47 @@ async def upload_pdf_to_azure_blob(pdf_bytes: bytes, pdf_filename: str, upload_d
     container = await get_container_client()
     blob_path = f"{upload_dir}/{pdf_filename}" if upload_dir else pdf_filename
     blob_client = container.get_blob_client(blob_path)
-    await blob_client.upload_blob(pdf_bytes, overwrite=True)
+    await blob_client.upload_blob(
+        pdf_bytes, 
+        overwrite=True,)
     return blob_client.url
+
+
+def download_blob_bytes(blob_path: str) -> bytes:
+    """
+    从 Azure Blob 存储下载文件内容
+
+    :param blob_path: Azure Blob 上的文件路径（容器内路径）
+    :return: 文件字节内容
+    """
+    connection_string = azure_blob_settings.AZURE_STORAGE_CONNECTION_STRING
+    container_name = azure_blob_settings.AZURE_STORAGE_CONTAINER_NAME
+    bsc = SyncBlobServiceClient.from_connection_string(connection_string)
+    container = bsc.get_container_client(container_name)
+    blob_client = container.get_blob_client(blob_path)
+    downloader = blob_client.download_blob()
+    return downloader.readall()
+
+
+def blob_url_to_path(blob_url: str) -> str:
+    """
+    将 Azure Blob URL 转换为容器内路径
+
+    :param blob_url: Azure Blob 的完整 URL
+    :return: 容器内路径
+    """
+    parsed = urlparse(blob_url)
+    if not parsed.scheme:
+        return blob_url.lstrip("/")
+
+    path = unquote(parsed.path).lstrip("/")
+    if not path:
+        raise ValueError("无效的 blob url")
+
+    container_name, _, blob_path = path.partition("/")
+    if not blob_path:
+        raise ValueError("无效的 blob url")
+    if container_name != azure_blob_settings.AZURE_STORAGE_CONTAINER_NAME:
+        raise ValueError("blob url 容器不匹配")
+
+    return blob_path

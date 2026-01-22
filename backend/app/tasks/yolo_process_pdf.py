@@ -62,10 +62,13 @@ async def publish_imgs_to_azure_blob(
 
 
 @celery_app.task
-def process_pdf_with_yolo(pdf_path: str) -> list[dict]:
-    doc = fitz.open(pdf_path)
+def process_pdf_with_yolo(blob_path: str) -> list[dict]:
+    from app.clients.azure_blob_client import download_blob_bytes
+
+    pdf_bytes = download_blob_bytes(blob_path)
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
     results = []
-    pdf_dir_name = os.path.basename(pdf_path).replace(".pdf", "")
+    pdf_dir_name = os.path.basename(blob_path).replace(".pdf", "")
     out_dir = os.path.join(TMP_PDF_IMGS_DIR, pdf_dir_name)
     os.makedirs(out_dir, exist_ok=True)
     imgs_paths = []
@@ -111,7 +114,7 @@ def process_pdf_with_yolo(pdf_path: str) -> list[dict]:
         results.append({"page": page_idx, "detections": page_result})
         
     # 上传到azure blob存储中
-    blob_urls = asyncio.run(publish_imgs_to_azure_blob(imgs_paths, AZURE_BLOB_PDF_IMG_DIR + "/" + os.path.basename(pdf_path)))
+    blob_urls = asyncio.run(publish_imgs_to_azure_blob(imgs_paths, AZURE_BLOB_PDF_IMG_DIR + "/" + os.path.basename(blob_path)))
     # blob_urls格式：list[{"img_path":..., "blob_url":...}]
     
     return {
